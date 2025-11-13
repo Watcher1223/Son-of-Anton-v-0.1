@@ -1,0 +1,135 @@
+# API Schema Extraction - Configuration
+
+# GitHub Scraping Settings
+github:
+  languages:
+    - JavaScript
+    - TypeScript
+  min_stars: 10
+  min_repo_size_kb: 100
+  max_repo_size_mb: 100
+  max_repos_per_query: 100
+  clone_depth: 1  # Shallow clone for faster downloads
+  
+# Schema Detection Patterns
+schema_patterns:
+  openapi:
+    files:
+      - openapi.yaml
+      - openapi.json
+      - swagger.yaml
+      - swagger.json
+      - api-spec.yaml
+    directories:
+      - docs/openapi
+      - api-docs
+      
+  validator:
+    files:
+      - "*.validator.js"
+      - "*.validator.ts"
+      - "*.schema.js"
+      - "*.schema.ts"
+    directories:
+      - validators
+      - validation
+      - schemas
+      - dto
+    libraries:
+      - joi
+      - zod
+      - class-validator
+      - yup
+      - ajv
+      
+  typedef:
+    files:
+      - "*.dto.ts"
+      - "*.types.ts"
+      - "*.interface.ts"
+    directories:
+      - types
+      - interfaces
+      - models
+      - dto
+
+# Framework Detection
+frameworks:
+  express:
+    indicators:
+      - express
+    routing_patterns:
+      - "app.get"
+      - "app.post"
+      - "router.get"
+      - "router.post"
+      
+  nestjs:
+    indicators:
+      - "@nestjs/core"
+      - "@nestjs/common"
+    routing_patterns:
+      - "@Controller"
+      - "@Get"
+      - "@Post"
+      
+  fastify:
+    indicators:
+      - fastify
+    routing_patterns:
+      - "fastify.get"
+      - "fastify.post"
+      - "fastify.route"
+
+# Feature Extraction Settings
+features:
+  endpoint:
+    - http_method
+    - path_depth
+    - param_count
+    - query_params
+    - body_params
+    - path_params
+    - has_middleware
+    - has_auth
+    - has_validation
+    - response_types
+    
+  repository:
+    - primary_language
+    - framework
+    - total_files
+    - total_lines
+    - endpoint_count
+    - endpoint_density
+    - has_readme
+    - has_docs
+    - dependency_count
+    - has_tests
+    
+  schema_source:
+    - has_openapi_spec
+    - has_validators
+    - has_type_defs
+    - has_db_models
+    - has_comments
+    - has_docstrings
+    - schema_file_count
+
+# Dataset Assembly
+dataset:
+  target_endpoints: 600
+  min_endpoints_per_repo: 5
+  output_format: csv
+  train_test_split: 0.8
+  validation_checks:
+    - no_duplicate_endpoints
+    - balanced_classes
+    - feature_completeness
+
+# Logging
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: logs/pipeline.log
+

@@ -1,0 +1,40 @@
+# Core dependencies
+PyGithub==2.1.1
+GitPython==3.1.40
+requests==2.31.0
+python-dotenv==1.0.0
+
+# Data processing
+pandas==2.1.4
+numpy==1.26.2
+
+# File parsing
+PyYAML==6.0.1
+esprima==4.0.1  # JavaScript parser
+tree-sitter==0.20.4
+
+# Web scraping and API interaction
+beautifulsoup4==4.12.2
+aiohttp==3.9.1
+
+# Code analysis
+radon==6.0.1  # Code complexity metrics
+lizard==1.17.10  # Code analysis tool
+
+# Logging and utilities
+tqdm==4.66.1
+colorlog==6.8.0
+
+# Development tools
+pytest==7.4.3
+pytest-cov==4.1.0
+black==23.12.1
+flake8==6.1.0
+mypy==1.7.1
+
+# Jupyter for exploration
+jupyter==1.0.0
+ipykernel==6.27.1
+matplotlib==3.8.2
+seaborn==0.13.0
+
