@@ -220,15 +220,15 @@ class EndpointDetector:
         all_endpoints = []
         
         # Search for route files
-        extensions = ['*.js', '*.ts']
-        route_patterns = ['**/routes/**/*', '**/controllers/**/*', '**/api/**/*']
+        extensions = ['.js', '.ts']
+        route_dirs = ['routes', 'controllers', 'api']
         
         files_to_check = set()
         
         # Collect files matching route patterns
-        for pattern in route_patterns:
+        for dir_name in route_dirs:
             for ext in extensions:
-                for file_path in repo_path.glob(f"{pattern}{ext}"):
+                for file_path in repo_path.rglob(f"{dir_name}/**/*{ext}"):
                     if 'node_modules' not in str(file_path) and 'test' not in str(file_path).lower():
                         files_to_check.add(file_path)
         
