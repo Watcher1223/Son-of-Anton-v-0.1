@@ -298,8 +298,10 @@ class DataPreprocessor:
         
         y_train = train_df[self.TARGET_COLUMN].values
         
-        # Fit label encoder
-        self.label_encoder.fit(self.CLASS_LABELS)
+        # Fit label encoder on actual data (handles unknown classes dynamically)
+        self.label_encoder.fit(y_train)
+        self.CLASS_LABELS = list(self.label_encoder.classes_)
+        logger.info(f"Classes found: {self.CLASS_LABELS}")
         y_train = self.label_encoder.transform(y_train)
         
         # Prepare features

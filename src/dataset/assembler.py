@@ -155,6 +155,11 @@ class DatasetAssembler:
         # Deduplicate
         records = self.deduplicate_endpoints(valid_records)
         
+        # Filter out unknown schema classes
+        before_filter = len(records)
+        records = [r for r in records if r.get('schema_class', 'unknown') != 'unknown']
+        logger.info(f"Filtered unknowns: {before_filter} -> {len(records)} records")
+        
         # Check class balance
         self.check_class_balance(records)
         
