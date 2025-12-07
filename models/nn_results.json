@@ -1,0 +1,102 @@
+{
+  "NeuralNetwork": {
+    "model_name": "Neural Network",
+    "test_metrics": {
+      "model_name": "NN_Test",
+      "accuracy": 0.3409090909090909,
+      "precision_macro": 0.11363636363636363,
+      "recall_macro": 0.3333333333333333,
+      "f1_macro": 0.1694915254237288,
+      "precision_weighted": 0.1162190082644628,
+      "recall_weighted": 0.3409090909090909,
+      "f1_weighted": 0.17334360554699535,
+      "precision_openapi": 0.0,
+      "recall_openapi": 0.0,
+      "f1_openapi": 0.0,
+      "precision_typedef": 0.0,
+      "recall_typedef": 0.0,
+      "f1_typedef": 0.0,
+      "precision_validator": 0.3409090909090909,
+      "recall_validator": 1.0,
+      "f1_validator": 0.5084745762711864,
+      "confusion_matrix": [
+        [
+          0,
+          0,
+          6
+        ],
+        [
+          0,
+          0,
+          23
+        ],
+        [
+          0,
+          0,
+          15
+        ]
+      ]
+    },
+    "train_metrics": {
+      "model_name": "NN_Train",
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "precision_weighted": 1.0,
+      "recall_weighted": 1.0,
+      "f1_weighted": 1.0,
+      "precision_openapi": 1.0,
+      "recall_openapi": 1.0,
+      "f1_openapi": 1.0,
+      "precision_typedef": 1.0,
+      "recall_typedef": 1.0,
+      "f1_typedef": 1.0,
+      "precision_validator": 1.0,
+      "recall_validator": 1.0,
+      "f1_validator": 1.0,
+      "confusion_matrix": [
+        [
+          132,
+          0,
+          0
+        ],
+        [
+          0,
+          321,
+          0
+        ],
+        [
+          0,
+          0,
+          343
+        ]
+      ]
+    },
+    "practical_metrics": {
+      "total_endpoints": 44,
+      "correct_predictions": 15,
+      "incorrect_predictions": 29,
+      "calls_without_model": 880,
+      "calls_with_model": 450,
+      "calls_saved": 430,
+      "percent_calls_saved": 48.86363636363637
+    },
+    "training_history": {
+      "epochs_trained": 100,
+      "final_train_loss": 7.121672401331695e-05,
+      "final_val_loss": 4.7852122521408475e-06,
+      "final_train_acc": 1.0,
+      "final_val_acc": 1.0
+    },
+    "hyperparameters": {
+      "hidden_dim1": 128,
+      "hidden_dim2": 64,
+      "dropout": 0.3,
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "max_epochs": 100,
+      "early_stopping_patience": 15
+    }
+  }
+}
