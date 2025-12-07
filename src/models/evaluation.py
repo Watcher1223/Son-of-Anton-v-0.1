@@ -114,10 +114,18 @@ class ModelEvaluator:
         Returns:
             Formatted classification report string
         """
+        # Get unique classes present in the data
+        unique_classes = np.unique(np.concatenate([y_true, y_pred]))
+        
+        # Filter labels and target_names to only include present classes
+        labels = [i for i in range(len(self.class_labels)) if i in unique_classes]
+        target_names = [self.class_labels[i] for i in labels]
+        
         return classification_report(
             y_true,
             y_pred,
-            target_names=self.class_labels,
+            labels=labels,
+            target_names=target_names,
             zero_division=0
         )
     
@@ -144,7 +152,12 @@ class ModelEvaluator:
         Returns:
             Matplotlib figure
         """
-        cm = confusion_matrix(y_true, y_pred)
+        # Get unique classes present in the data
+        unique_classes = np.unique(np.concatenate([y_true, y_pred]))
+        labels = [i for i in range(len(self.class_labels)) if i in unique_classes]
+        display_labels = [self.class_labels[i] for i in labels]
+        
+        cm = confusion_matrix(y_true, y_pred, labels=labels)
         
         if normalize:
             cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
@@ -159,8 +172,8 @@ class ModelEvaluator:
             annot=True,
             fmt=fmt,
             cmap='Blues',
-            xticklabels=self.class_labels,
-            yticklabels=self.class_labels,
+            xticklabels=display_labels,
+            yticklabels=display_labels,
             ax=ax
         )
         
@@ -205,8 +218,14 @@ class ModelEvaluator:
         if n_models == 1:
             axes = [axes]
         
+        # Get unique classes from all predictions combined with y_true
+        all_preds = np.concatenate([y_true] + list(predictions.values()))
+        unique_classes = np.unique(all_preds)
+        labels = [i for i in range(len(self.class_labels)) if i in unique_classes]
+        display_labels = [self.class_labels[i] for i in labels]
+        
         for ax, (model_name, y_pred) in zip(axes, predictions.items()):
-            cm = confusion_matrix(y_true, y_pred)
+            cm = confusion_matrix(y_true, y_pred, labels=labels)
             cm_norm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
             
             sns.heatmap(
@@ -214,8 +233,8 @@ class ModelEvaluator:
                 annot=True,
                 fmt='.2%',
                 cmap='Blues',
-                xticklabels=self.class_labels,
-                yticklabels=self.class_labels,
+                xticklabels=display_labels,
+                yticklabels=display_labels,
                 ax=ax
             )
             
