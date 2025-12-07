@@ -91,6 +91,12 @@ def clone_and_process_repos(csv_file: str, target_count: int = 12, output_dir: P
                 logger.warning("No endpoints found, skipping")
                 continue
             
+            # Cap endpoints per repo to prevent large repos from dominating
+            MAX_ENDPOINTS_PER_REPO = 50
+            if len(endpoints) > MAX_ENDPOINTS_PER_REPO:
+                logger.info(f"Capping endpoints from {len(endpoints)} to {MAX_ENDPOINTS_PER_REPO}")
+                endpoints = endpoints[:MAX_ENDPOINTS_PER_REPO]
+            
             # Extract repository features
             repo_features = repo_extractor.extract_all_features(clone_path, len(endpoints))
             
@@ -142,15 +148,24 @@ def clone_and_process_repos(csv_file: str, target_count: int = 12, output_dir: P
 
 
 def main():
-    csv_file = "github_repos_20251113_024339.csv"
+    # Accept CSV filename as argument, default to curated_repos.csv if it exists
+    if len(sys.argv) > 1:
+        csv_file = sys.argv[1]
+    elif Path("curated_repos.csv").exists():
+        csv_file = "curated_repos.csv"
+        logger.info("Using curated_repos.csv for better class balance")
+    else:
+        csv_file = "github_repos_20251113_024339.csv"
     
     if not Path(csv_file).exists():
         logger.error(f"CSV file not found: {csv_file}")
+        logger.error("Usage: python generate_dataset_from_csv.py [csv_file]")
         sys.exit(1)
     
-    # Clone and extract features
+    # Clone and extract features - increased target count for better dataset
     logger.info("Phase 1: Cloning repositories and extracting features...")
-    records = clone_and_process_repos(csv_file, target_count=12)
+    logger.info(f"Using CSV: {csv_file}")
+    records = clone_and_process_repos(csv_file, target_count=40)
     
     if len(records) == 0:
         logger.error("No records extracted!")

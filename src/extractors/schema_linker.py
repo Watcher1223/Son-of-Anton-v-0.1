@@ -125,10 +125,19 @@ class SchemaLinker:
         features['has_db_models'] = self._check_for_db_models(repo_path)
         
         # Check for comments/documentation near endpoint
-        features['has_comments'] = self._check_for_comments(
-            Path(endpoint.get('file', '')),
-            endpoint.get('line', 0)
-        )
+        # The endpoint file path needs to be joined with repo_path
+        endpoint_file = endpoint.get('file', '')
+        if endpoint_file:
+            # Handle both absolute and relative paths
+            file_path = Path(endpoint_file)
+            if not file_path.is_absolute():
+                file_path = repo_path / endpoint_file
+            features['has_comments'] = self._check_for_comments(
+                file_path,
+                endpoint.get('line', 0)
+            )
+        else:
+            features['has_comments'] = False
         
         return features
     
