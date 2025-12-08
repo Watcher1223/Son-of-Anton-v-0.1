@@ -52,15 +52,39 @@ class DataPreprocessor:
     
     # Boolean columns (already encoded, keep as-is)
     BOOLEAN_COLUMNS = [
+        # Path/method features
         'has_path_params', 'has_version', 'has_api_prefix',
         'is_get', 'is_post', 'is_put', 'is_delete', 'is_patch',
         'is_safe_method', 'is_idempotent', 'modifies_data',
+        # Schema detection features
         'has_openapi_spec', 'has_validators', 'has_type_defs',
         'has_multiple_schema_types', 'has_related_schema',
         'has_db_models', 'has_comments',
+        # Repo-level features
         'is_typescript', 'is_express', 'is_nestjs', 'is_fastify',
-        'has_orm', 'has_testing', 'has_linting', 'has_typescript',
+        'has_orm', 'has_testing', 'has_linting',
         'has_readme', 'has_docs_folder', 'has_api_docs', 'has_swagger',
+        # Original context features
+        'has_middleware', 'has_auth', 'has_validation',
+        'has_async', 'has_try_catch', 'has_response_types',
+        'has_query_params', 'has_body_params', 'has_file_upload',
+        # NEW: Validator-specific patterns
+        'has_body_decorator', 'has_query_decorator', 'has_param_decorator',
+        'has_validation_pipe', 'has_validate_call',
+        'has_joi_validate', 'has_zod_parse', 'has_yup_validate',
+        'has_express_validator',
+        # NEW: OpenAPI-specific patterns
+        'has_api_body_decorator', 'has_api_response_decorator',
+        'has_api_operation_decorator', 'has_api_property_decorator',
+        'has_api_tags_decorator', 'has_swagger_comment',
+        # NEW: TypeDef-specific patterns
+        'has_dto_reference', 'has_interface_cast', 'has_type_annotation',
+        'has_generic_type', 'has_return_type',
+        # NEW: File import features
+        'file_imports_class_validator', 'file_imports_class_transformer',
+        'file_imports_joi', 'file_imports_zod', 'file_imports_yup',
+        'file_imports_swagger', 'file_imports_express_validator',
+        'file_imports_dto', 'file_imports_types',
     ]
     
     # Continuous columns that need scaling
@@ -73,6 +97,10 @@ class DataPreprocessor:
         'total_files', 'total_lines_of_code', 'avg_lines_per_file',
         'dependency_count', 'dev_dependency_count', 'total_dependency_count',
         'readme_length', 'endpoint_count', 'endpoints_per_file', 'endpoints_per_1000_lines',
+        # Original context features
+        'function_length', 'query_param_count', 'body_param_count', 'total_param_count',
+        # NEW: Aggregate signal counts
+        'validator_signal_count', 'openapi_signal_count', 'typedef_signal_count',
     ]
     
     # Class labels

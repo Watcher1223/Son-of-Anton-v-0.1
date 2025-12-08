@@ -2,6 +2,7 @@
 Endpoint Feature Extractor
 
 Extracts features from individual API endpoints.
+Enhanced with validation-specific, OpenAPI, and TypeDef pattern detection.
 """
 
 import re
@@ -10,6 +11,55 @@ from typing import Dict, List, Optional
 import logging
 
 logger = logging.getLogger(__name__)
+
+# =============================================================================
+# PATTERN DEFINITIONS - Endpoint-level feature detection
+# =============================================================================
+
+# Validation-specific patterns (distinguish between validation libraries)
+VALIDATOR_PATTERNS = {
+    'has_body_decorator': r'@Body\s*\(',
+    'has_query_decorator': r'@Query\s*\(',
+    'has_param_decorator': r'@Param\s*\(',
+    'has_validation_pipe': r'@UsePipes\s*\(|ValidationPipe',
+    'has_validate_call': r'\.validate\s*\(',
+    'has_joi_validate': r'Joi\.validate|schema\.validate|\.validateAsync\s*\(',
+    'has_zod_parse': r'z\.\w+\(|\.parse\s*\(|\.safeParse\s*\(',
+    'has_yup_validate': r'yup\.|validationSchema',
+    'has_express_validator': r'\bbody\s*\(\s*[\'"]|query\s*\(\s*[\'"]|param\s*\(\s*[\'"]|check\s*\(\s*[\'"]',
+}
+
+# OpenAPI/Swagger patterns
+OPENAPI_PATTERNS = {
+    'has_api_body_decorator': r'@ApiBody\s*\(',
+    'has_api_response_decorator': r'@ApiResponse\s*\(',
+    'has_api_operation_decorator': r'@ApiOperation\s*\(',
+    'has_api_property_decorator': r'@ApiProperty\s*\(',
+    'has_api_tags_decorator': r'@ApiTags\s*\(',
+    'has_swagger_comment': r'@swagger|@openapi|\*\s*@api\s',
+}
+
+# TypeDef patterns (TypeScript interfaces/types)
+TYPEDEF_PATTERNS = {
+    'has_dto_reference': r'\b[A-Z]\w*Dto\b',
+    'has_interface_cast': r'as\s+[A-Z]\w*(?:Dto|Interface|Type|Request|Response)\b',
+    'has_type_annotation': r':\s*[A-Z]\w*(?:Dto|Interface|Type)\b',
+    'has_generic_type': r'<[A-Z]\w*(?:Dto|Interface|Type)>',
+    'has_return_type': r'\)\s*:\s*Promise<[A-Z]\w+>|\)\s*:\s*[A-Z]\w+\s*\{',
+}
+
+# File-level import patterns
+IMPORT_PATTERNS = {
+    'file_imports_class_validator': r"from\s+['\"]class-validator['\"]",
+    'file_imports_class_transformer': r"from\s+['\"]class-transformer['\"]",
+    'file_imports_joi': r"from\s+['\"]@?hapi/joi['\"]|from\s+['\"]joi['\"]|require\s*\(\s*['\"]joi['\"]\s*\)",
+    'file_imports_zod': r"from\s+['\"]zod['\"]|require\s*\(\s*['\"]zod['\"]\s*\)",
+    'file_imports_yup': r"from\s+['\"]yup['\"]",
+    'file_imports_swagger': r"from\s+['\"]@nestjs/swagger['\"]",
+    'file_imports_express_validator': r"from\s+['\"]express-validator['\"]",
+    'file_imports_dto': r"from\s+['\"][^'\"]*\.dto['\"]|from\s+['\"][^'\"]*dto['\"]",
+    'file_imports_types': r"from\s+['\"][^'\"]*\.types?['\"]|from\s+['\"][^'\"]*types?['\"]",
+}
 
 
 class EndpointFeatureExtractor:
@@ -82,6 +132,147 @@ class EndpointFeatureExtractor:
         
         return features
     
+    def extract_file_imports(self, file_path: Path) -> Dict:
+        """
+        Extract import-based features from file header.
+        
+        Analyzes the first 50 lines of the file to detect which
+        validation/schema libraries are imported.
+        
+        Args:
+            file_path: Path to source file
+            
+        Returns:
+            Dictionary of import-based boolean features
+        """
+        features = {k: False for k in IMPORT_PATTERNS.keys()}
+        
+        try:
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                # Read first 50 lines (import section)
+                header_lines = []
+                for i, line in enumerate(f):
+                    if i >= 50:
+                        break
+                    header_lines.append(line)
+                header = ''.join(header_lines)
+            
+            for name, pattern in IMPORT_PATTERNS.items():
+                features[name] = bool(re.search(pattern, header))
+                
+        except Exception as e:
+            logger.warning(f"Error reading imports from {file_path}: {e}")
+        
+        return features
+    
+    def extract_handler_context(self, file_path: Path, line_number: int) -> str:
+        """
+        Get handler function context (fixed 50-line window after endpoint).
+        
+        Args:
+            file_path: Path to source file
+            line_number: Line number of endpoint declaration
+            
+        Returns:
+            String containing handler context
+        """
+        try:
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                lines = f.readlines()
+            
+            # Start from endpoint line, read forward 50 lines
+            start = max(0, line_number - 1)
+            end = min(len(lines), line_number + 50)
+            return ''.join(lines[start:end])
+            
+        except Exception as e:
+            logger.warning(f"Error reading handler context from {file_path}:{line_number}: {e}")
+            return ""
+    
+    def extract_validation_features(self, context: str) -> Dict:
+        """
+        Extract validation-specific features from handler context.
+        
+        Detects specific validation library patterns, OpenAPI decorators,
+        and TypeScript type definition patterns.
+        
+        Args:
+            context: Handler code context string
+            
+        Returns:
+            Dictionary of validation-related boolean features
+        """
+        features = {}
+        
+        # Check validator patterns
+        for name, pattern in VALIDATOR_PATTERNS.items():
+            features[name] = bool(re.search(pattern, context))
+        
+        # Check OpenAPI patterns
+        for name, pattern in OPENAPI_PATTERNS.items():
+            features[name] = bool(re.search(pattern, context))
+        
+        # Check TypeDef patterns
+        for name, pattern in TYPEDEF_PATTERNS.items():
+            features[name] = bool(re.search(pattern, context))
+        
+        return features
+    
+    def compute_signal_counts(self, features: Dict) -> Dict:
+        """
+        Compute aggregate signal counts per schema category.
+        
+        These aggregate features help the model by combining multiple
+        individual signals into a single strength indicator.
+        
+        Args:
+            features: Dictionary containing individual feature values
+            
+        Returns:
+            Dictionary with signal count features
+        """
+        return {
+            # Count of validator-related signals
+            'validator_signal_count': sum([
+                features.get('has_body_decorator', False),
+                features.get('has_query_decorator', False),
+                features.get('has_param_decorator', False),
+                features.get('has_validation_pipe', False),
+                features.get('has_validate_call', False),
+                features.get('has_joi_validate', False),
+                features.get('has_zod_parse', False),
+                features.get('has_yup_validate', False),
+                features.get('has_express_validator', False),
+                features.get('file_imports_class_validator', False),
+                features.get('file_imports_joi', False),
+                features.get('file_imports_zod', False),
+                features.get('file_imports_yup', False),
+                features.get('file_imports_express_validator', False),
+            ]),
+            
+            # Count of OpenAPI-related signals
+            'openapi_signal_count': sum([
+                features.get('has_api_body_decorator', False),
+                features.get('has_api_response_decorator', False),
+                features.get('has_api_operation_decorator', False),
+                features.get('has_api_property_decorator', False),
+                features.get('has_api_tags_decorator', False),
+                features.get('has_swagger_comment', False),
+                features.get('file_imports_swagger', False),
+            ]),
+            
+            # Count of TypeDef-related signals
+            'typedef_signal_count': sum([
+                features.get('has_dto_reference', False),
+                features.get('has_interface_cast', False),
+                features.get('has_type_annotation', False),
+                features.get('has_generic_type', False),
+                features.get('has_return_type', False),
+                features.get('file_imports_dto', False),
+                features.get('file_imports_types', False),
+            ]),
+        }
+    
     def extract_code_context_features(self, file_path: Path, line_number: int) -> Dict:
         """
         Extract features from code surrounding the endpoint definition
@@ -134,7 +325,7 @@ class EndpointFeatureExtractor:
             ]
             features['has_auth'] = any(re.search(p, context, re.IGNORECASE) for p in auth_patterns)
             
-            # Detect validation
+            # Detect validation (general)
             validation_patterns = [
                 r'\bvalidate\b',
                 r'\bschema\b',
@@ -267,10 +458,15 @@ class EndpointFeatureExtractor:
         
         # Extract code context features
         file_path = Path(endpoint['file'])
+        # Handle paths that might already include repo_path (from detector)
         if not file_path.is_absolute():
-            file_path = repo_path / file_path
+            # Check if file exists as-is (path already includes repo_path)
+            if not file_path.exists():
+                # Try prepending repo_path
+                file_path = repo_path / file_path
         
         if file_path.exists():
+            # Original context features
             context_features = self.extract_code_context_features(
                 file_path, 
                 endpoint.get('line', 0)
@@ -284,6 +480,22 @@ class EndpointFeatureExtractor:
                 endpoint['path']
             )
             features.update(param_features)
+            
+            # NEW: Extract file-level import features
+            import_features = self.extract_file_imports(file_path)
+            features.update(import_features)
+            
+            # NEW: Extract handler context and validation-specific features
+            handler_context = self.extract_handler_context(
+                file_path,
+                endpoint.get('line', 0)
+            )
+            validation_features = self.extract_validation_features(handler_context)
+            features.update(validation_features)
+            
+            # NEW: Compute aggregate signal counts
+            signal_counts = self.compute_signal_counts(features)
+            features.update(signal_counts)
         
         return features
 
@@ -306,6 +518,5 @@ if __name__ == "__main__":
     features = extractor.extract_all_features(test_endpoint, Path("data/raw/example_repo"))
     
     print("\nExtracted features:")
-    for key, value in features.items():
+    for key, value in sorted(features.items()):
         print(f"  {key}: {value}")
-
