@@ -92,7 +92,7 @@ def clone_and_process_repos(csv_file: str, target_count: int = 12, output_dir: P
                 continue
             
             # Cap endpoints per repo to prevent large repos from dominating
-            MAX_ENDPOINTS_PER_REPO = 300
+            MAX_ENDPOINTS_PER_REPO = 100
             if len(endpoints) > MAX_ENDPOINTS_PER_REPO:
                 logger.info(f"Capping endpoints from {len(endpoints)} to {MAX_ENDPOINTS_PER_REPO}")
                 endpoints = endpoints[:MAX_ENDPOINTS_PER_REPO]
