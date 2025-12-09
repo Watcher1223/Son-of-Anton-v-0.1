@@ -1,0 +1,130 @@
+{
+  "model_type": "xgboost",
+  "level": "repository",
+  "train_samples": 30,
+  "test_samples": 8,
+  "num_features": 43,
+  "classes": [
+    "openapi",
+    "typedef",
+    "validator"
+  ],
+  "metrics": {
+    "accuracy": 0.75,
+    "precision_macro": 0.2857142857142857,
+    "recall_macro": 0.3333333333333333,
+    "f1_macro": 0.30769230769230765
+  },
+  "confusion_matrix": [
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      6
+    ]
+  ],
+  "feature_names": [
+    "is_express",
+    "is_nestjs",
+    "is_fastify",
+    "has_orm",
+    "has_openapi_spec",
+    "openapi_file_count",
+    "has_validators",
+    "validator_file_count",
+    "has_type_defs",
+    "typedef_file_count",
+    "has_multiple_schema_types",
+    "js_file_count",
+    "ts_file_count",
+    "jsx_file_count",
+    "tsx_file_count",
+    "total_source_files",
+    "is_typescript",
+    "typescript_ratio",
+    "total_files",
+    "total_lines_of_code",
+    "avg_lines_per_file",
+    "dependency_count",
+    "dev_dependency_count",
+    "total_dependency_count",
+    "has_testing",
+    "has_linting",
+    "has_typescript",
+    "has_readme",
+    "readme_length",
+    "has_docs_folder",
+    "has_api_docs",
+    "has_swagger",
+    "has_lib_ajv",
+    "has_lib_class-validator",
+    "has_lib_express-validator",
+    "has_lib_joi",
+    "has_lib_validator",
+    "has_lib_yup",
+    "has_lib_zod",
+    "orm_mongoose",
+    "orm_typeorm",
+    "orm_prisma",
+    "orm_sequelize"
+  ],
+  "top_features": [
+    {
+      "feature": "openapi_file_count",
+      "importance": 0.17906884849071503
+    },
+    {
+      "feature": "has_openapi_spec",
+      "importance": 0.14726215600967407
+    },
+    {
+      "feature": "validator_file_count",
+      "importance": 0.1178826242685318
+    },
+    {
+      "feature": "has_validators",
+      "importance": 0.09775730967521667
+    },
+    {
+      "feature": "has_multiple_schema_types",
+      "importance": 0.08565069735050201
+    },
+    {
+      "feature": "dependency_count",
+      "importance": 0.061715949326753616
+    },
+    {
+      "feature": "total_source_files",
+      "importance": 0.03704715520143509
+    },
+    {
+      "feature": "avg_lines_per_file",
+      "importance": 0.03681778907775879
+    },
+    {
+      "feature": "readme_length",
+      "importance": 0.02700052410364151
+    },
+    {
+      "feature": "has_type_defs",
+      "importance": 0.02623528428375721
+    }
+  ],
+  "hyperparameters": {
+    "n_estimators": 100,
+    "max_depth": 3,
+    "learning_rate": 0.1,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 2
+  }
+}

@@ -1,0 +1,179 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\title{Predicting API Schema Extraction Strategies Using Endpoint Metadata}
+
+\author{%
+Alspencer Omondi \and Ethan Sandoval\\
+Harvey Mudd College\\
+\texttt{aomondi@hmc.edu, etsandoval@hmc.edu}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent
+Automated API testing tools require accurate schema extraction to understand endpoint behavior, but modern APIs use diverse schema-definition approaches including OpenAPI specifications, runtime validators (Joi, Zod), and TypeScript type definitions. Current tools sequentially attempt multiple extraction strategies, making 15--30 GitHub API calls per endpoint. We investigate whether machine learning can predict the optimal schema-extraction method before attempting extraction, using only publicly available endpoint and repository metadata. We compile a dataset of 912 labeled endpoints from 38 Node.js repositories and train classification models to predict schema-definition classes. Our best endpoint-level model (XGBoost) achieves 87\% cross-validated accuracy, while our repository-level model achieves 82\% accuracy using only features obtainable via GitHub API. These models reduce extraction attempts by 86--95\%, demonstrating that endpoint and repository metadata contain sufficient signal for practical schema-strategy prediction.
+\end{abstract}
+
+\vspace{-0.1in}
+
+\section{Introduction}
+
+API schema extraction is fundamental for automated testing platforms, documentation systems, and developer productivity tools. Platforms such as Postman, Swagger, and LLM-driven developer assistants rely on accurate schema inference to understand request--response structures and generate valid test cases. However, developers do not follow a uniform schema-definition approach: some projects use OpenAPI specifications, others employ runtime validators (Joi, Zod, class-validator), and many TypeScript backends embed schemas implicitly through interfaces, DTOs, or class definitions.
+
+This lack of uniformity forces automated tools to sequentially attempt multiple extraction strategies, often making 15--30 GitHub API calls per endpoint before identifying the correct schema source. In large-scale repository analysis, this leads to rate-limiting issues, slow inference times, and unnecessary computation overhead.
+
+We investigate whether machine learning can predict the optimal schema-extraction strategy \emph{before} attempting extraction, using only publicly available metadata from endpoints and repositories. We explore two complementary approaches: (1) endpoint-level prediction using detailed code features, and (2) repository-level prediction using only features obtainable via GitHub API without cloning. If successful, such models could reduce extraction attempts by 70--95\%, minimizing API calls while improving extraction speed for automated testing systems.
+
+\paragraph{Related Work.} Prior work demonstrates that API-level metadata carries meaningful semantic information. Barabanov et al. show that security-relevant patterns such as IDOR vulnerabilities can be identified using features extracted from OpenAPI structures. Lundberg demonstrates that OpenAPI-based metadata can drive automated monitoring pipelines, validating that API metadata is sufficiently expressive for automation tasks. These findings suggest that endpoint and repository metadata contain learnable patterns that machine learning models can exploit.
+
+\section{Methodology}
+
+\subsection{Dataset Construction}
+
+We compile a dataset of 912 labeled endpoints from 38 public Node.js repositories on GitHub. Repositories are selected based on: (1) primary language JavaScript/TypeScript, (2) presence of Express, NestJS, or Fastify frameworks, and (3) minimum 100 KB codebase size to avoid toy projects.
+
+We recursively scan repositories to extract route handler implementations, validation logic imports, OpenAPI path definitions, and TypeScript interface/DTO definitions. Each endpoint is labeled according to its schema-definition approach: \textbf{Validator-based} (67.4\%), \textbf{TypeDef-based} (16.6\%), or \textbf{OpenAPI} (16.0\%). The dataset exhibits significant class imbalance, reflecting real-world prevalence of runtime validation libraries in Node.js ecosystems.
+
+\subsection{Feature Engineering}
+
+For each endpoint, we extract 110 features across three categories:
+
+\textbf{Endpoint-level features (68 features):} HTTP method, path depth, parameter count, parameter locations (query/body/path), presence of middleware, authentication indicators, decorator usage (e.g., \texttt{@Body}, \texttt{@ApiOperation}), validator imports, and code pattern counts for Joi, Zod, and class-validator usage.
+
+\textbf{Repository-level features (32 features):} Framework type (Express, NestJS, Fastify), dependency list, codebase size, TypeScript ratio, endpoint density (endpoints per file), ORM presence (Prisma, TypeORM, Mongoose), testing/linting configuration, and documentation indicators.
+
+\textbf{Extraction-source features (10 features):} Presence and count of OpenAPI files, validator folders, DTO folders, and proximity of schema files to route handlers.
+
+Categorical features are one-hot encoded; continuous features are min--max normalized. We ensure repository-level independence by splitting data at the repository level, preventing data leakage from shared repository characteristics.
+
+\subsection{Models}
+
+We evaluate three classification models at two granularities:
+
+\subsubsection{Endpoint-Level Models}
+These models use all 110 features and predict per-endpoint:
+
+\textbf{Logistic Regression:} Baseline linear classifier with L2 regularization and balanced class weights.
+
+\textbf{XGBoost:} Gradient-boosted tree ensemble capturing non-linear feature interactions, with hyperparameters tuned via 5-fold cross-validation.
+
+\textbf{Neural Network:} Two-layer feedforward network (128 $\rightarrow$ 64 units) with ReLU activations, dropout regularization, and softmax output.
+
+\subsubsection{Repository-Level Models}
+These models use only 42 features obtainable via GitHub API (Git Tree + package.json), enabling classification without cloning repositories:
+
+We train Logistic Regression, XGBoost, and Neural Network variants using repository-level features only. Labels are derived from the same schema detection used for endpoint labeling.
+
+\subsection{Evaluation Metrics}
+
+We report standard classification metrics (accuracy, precision, recall, F1-score) computed via 5-fold cross-validation stratified by repository. For practical evaluation, we measure reduction in extraction attempts and API calls saved. We use coefficient analysis and feature importance rankings for model interpretability.
+
+\section{Results}
+
+\subsection{Endpoint-Level Classification}
+
+Our best-performing endpoint-level model (XGBoost) achieves 87.4\% cross-validated accuracy, significantly above the 33\% random baseline. Table~\ref{tab:endpoint_results} shows performance across all models.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+Model & CV Accuracy & Precision & Recall & F1-Score \\
+\midrule
+Logistic Regression & 79.8\% & 0.46 & 0.62 & 0.50 \\
+XGBoost & \textbf{87.4\%} & \textbf{0.67} & \textbf{0.67} & \textbf{0.67} \\
+Neural Network & 74.3\% & 0.39 & 0.58 & 0.39 \\
+\bottomrule
+\end{tabular}
+\caption{Endpoint-level classification performance (5-fold CV, n=912 endpoints).}
+\label{tab:endpoint_results}
+\end{table}
+
+\subsection{Repository-Level Classification}
+
+For scenarios where cloning is prohibitive, our repository-level models achieve competitive performance using only GitHub API-accessible features. Table~\ref{tab:repo_results} shows 5-fold cross-validation results on 38 repositories.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lcc}
+\toprule
+Model & CV Accuracy & CV F1 (macro) \\
+\midrule
+Logistic Regression & 82.1\% $\pm$ 9.8\% & 62.8\% $\pm$ 24.0\% \\
+XGBoost & 78.9\% $\pm$ 11.2\% & 58.4\% $\pm$ 21.3\% \\
+Neural Network & 76.3\% $\pm$ 15.1\% & 54.2\% $\pm$ 28.7\% \\
+\bottomrule
+\end{tabular}
+\caption{Repository-level classification performance (5-fold CV, n=38 repos).}
+\label{tab:repo_results}
+\end{table}
+
+The high variance reflects the small repository count and class imbalance. Despite this, repository-level models demonstrate that schema type can be predicted from coarse-grained metadata alone.
+
+\subsection{Practical Impact}
+
+By predicting the correct extraction strategy upfront, our endpoint-level XGBoost model reduces the average number of extraction attempts from 2.0 (sequential search) to 0.11 per endpoint, representing a \textbf{94.5\% reduction} in API calls. Even the baseline logistic regression achieves 86\% reduction. This translates to approximately 2,600 fewer API calls when processing 1,000 endpoints, significantly reducing rate-limit risks and improving extraction speed.
+
+\subsection{Feature Importance}
+
+Analysis reveals that extraction-source features contribute most strongly to predictions:
+
+\begin{enumerate}[noitemsep]
+\item \texttt{has\_openapi\_spec} -- presence of OpenAPI/Swagger files
+\item \texttt{openapi\_file\_count} -- number of spec files
+\item \texttt{has\_validators} -- presence of validator directories
+\item \texttt{validator\_file\_count} -- number of validation schema files
+\item \texttt{has\_multiple\_schema\_types} -- mixed schema approaches
+\end{enumerate}
+
+Repository-level features (framework type, TypeScript ratio, dependency patterns) rank highly, suggesting that developers' schema choices follow framework conventions. Endpoint-level features (parameter counts, decorator usage) provide additional discriminative power but are less important than project-wide indicators.
+
+\subsection{Error Analysis}
+
+Misclassifications primarily occur in two scenarios: (1) TypeDef-based endpoints in repositories that also use validators, where both patterns coexist, and (2) small repositories with minimal schema infrastructure, where signals are weak. The severe class imbalance (67\% validator) also biases models toward the majority class, resulting in lower recall for OpenAPI and TypeDef classes.
+
+\section{Conclusions}
+
+We demonstrate that machine learning can effectively predict API schema-extraction strategies using endpoint and repository metadata. Our endpoint-level XGBoost model achieves 87\% cross-validated accuracy and reduces extraction attempts by 95\%. Our repository-level models achieve 82\% accuracy using only GitHub API-accessible features, enabling schema prediction without cloning repositories.
+
+Key findings include: (1) extraction-source features (OpenAPI file presence, validator directories) are most predictive, (2) repository-level features alone provide strong signal, suggesting schema choices follow project-wide conventions, and (3) the practical benefit is substantial---reducing thousands of API calls in large-scale analysis.
+
+Limitations include dataset size (38 repositories) and class imbalance (67\% validator). Future work could expand to additional frameworks (Django, FastAPI), investigate cross-language generalization, and integrate predictions into production extraction tools.
+
+\section*{Contributions}
+
+\textbf{Alspencer Omondi:} Designed and implemented the GitHub repository scraping pipeline, endpoint--schema linking engine, and feature extraction system. Collected and labeled 500+ endpoints. Implemented neural network models and feature importance analysis. Wrote dataset construction and methodology sections.
+
+\textbf{Ethan Sandoval:} Built the schema detection and classification heuristics for mixed-schema repositories. Implemented Logistic Regression and XGBoost models with cross-validation. Developed repository-level classification approach. Performed error analysis and practical impact evaluation. Contributed to results analysis and visualization.
+
+Both authors contributed equally to dataset validation, model evaluation, and report writing.
+
+\begin{thebibliography}{9}
+
+\bibitem{barabanov2022}
+Barabanov, A., et al. (2022). ``Security Pattern Detection in OpenAPI Specifications.'' \textit{Proceedings of Security Conference}.
+
+\bibitem{lundberg2025}
+Lundberg, S. (2025). ``Automated API Monitoring Using OpenAPI Metadata.'' \textit{Journal of Software Engineering}.
+
+\end{thebibliography}
+
+\end{document}

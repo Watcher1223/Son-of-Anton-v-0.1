@@ -1,0 +1,128 @@
+{
+  "model_type": "logistic_regression",
+  "level": "repository",
+  "train_samples": 30,
+  "test_samples": 8,
+  "num_features": 43,
+  "classes": [
+    "openapi",
+    "typedef",
+    "validator"
+  ],
+  "metrics": {
+    "accuracy": 0.75,
+    "precision_macro": 0.4444444444444444,
+    "recall_macro": 0.6111111111111112,
+    "f1_macro": 0.4696969696969697
+  },
+  "confusion_matrix": [
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      5
+    ]
+  ],
+  "feature_names": [
+    "is_express",
+    "is_nestjs",
+    "is_fastify",
+    "has_orm",
+    "has_openapi_spec",
+    "openapi_file_count",
+    "has_validators",
+    "validator_file_count",
+    "has_type_defs",
+    "typedef_file_count",
+    "has_multiple_schema_types",
+    "js_file_count",
+    "ts_file_count",
+    "jsx_file_count",
+    "tsx_file_count",
+    "total_source_files",
+    "is_typescript",
+    "typescript_ratio",
+    "total_files",
+    "total_lines_of_code",
+    "avg_lines_per_file",
+    "dependency_count",
+    "dev_dependency_count",
+    "total_dependency_count",
+    "has_testing",
+    "has_linting",
+    "has_typescript",
+    "has_readme",
+    "readme_length",
+    "has_docs_folder",
+    "has_api_docs",
+    "has_swagger",
+    "has_lib_ajv",
+    "has_lib_class-validator",
+    "has_lib_express-validator",
+    "has_lib_joi",
+    "has_lib_validator",
+    "has_lib_yup",
+    "has_lib_zod",
+    "orm_mongoose",
+    "orm_typeorm",
+    "orm_prisma",
+    "orm_sequelize"
+  ],
+  "top_features": [
+    {
+      "feature": "has_openapi_spec",
+      "importance": 0.7894945518931422
+    },
+    {
+      "feature": "has_validators",
+      "importance": 0.6125746842903913
+    },
+    {
+      "feature": "has_multiple_schema_types",
+      "importance": 0.5370335915904098
+    },
+    {
+      "feature": "has_swagger",
+      "importance": 0.3014817958390419
+    },
+    {
+      "feature": "has_api_docs",
+      "importance": 0.3014817958390419
+    },
+    {
+      "feature": "has_docs_folder",
+      "importance": 0.2838734121418313
+    },
+    {
+      "feature": "has_lib_class-validator",
+      "importance": 0.282090561497963
+    },
+    {
+      "feature": "is_nestjs",
+      "importance": 0.282090561497963
+    },
+    {
+      "feature": "has_lib_express-validator",
+      "importance": 0.270640367759029
+    },
+    {
+      "feature": "has_lib_joi",
+      "importance": 0.2598419399668262
+    }
+  ],
+  "hyperparameters": {
+    "max_iter": 1000,
+    "class_weight": "balanced",
+    "solver": "lbfgs",
+    "multi_class": "multinomial"
+  }
+}

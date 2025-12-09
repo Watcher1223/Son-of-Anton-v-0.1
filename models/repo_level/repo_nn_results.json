@@ -1,0 +1,97 @@
+{
+  "model_type": "neural_network",
+  "level": "repository",
+  "train_samples": 30,
+  "test_samples": 8,
+  "num_features": 43,
+  "classes": [
+    "openapi",
+    "typedef",
+    "validator"
+  ],
+  "metrics": {
+    "accuracy": 0.75,
+    "precision_macro": 0.5,
+    "recall_macro": 0.6111111111111112,
+    "f1_macro": 0.5252525252525252
+  },
+  "confusion_matrix": [
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      5
+    ]
+  ],
+  "feature_names": [
+    "is_express",
+    "is_nestjs",
+    "is_fastify",
+    "has_orm",
+    "has_openapi_spec",
+    "openapi_file_count",
+    "has_validators",
+    "validator_file_count",
+    "has_type_defs",
+    "typedef_file_count",
+    "has_multiple_schema_types",
+    "js_file_count",
+    "ts_file_count",
+    "jsx_file_count",
+    "tsx_file_count",
+    "total_source_files",
+    "is_typescript",
+    "typescript_ratio",
+    "total_files",
+    "total_lines_of_code",
+    "avg_lines_per_file",
+    "dependency_count",
+    "dev_dependency_count",
+    "total_dependency_count",
+    "has_testing",
+    "has_linting",
+    "has_typescript",
+    "has_readme",
+    "readme_length",
+    "has_docs_folder",
+    "has_api_docs",
+    "has_swagger",
+    "has_lib_ajv",
+    "has_lib_class-validator",
+    "has_lib_express-validator",
+    "has_lib_joi",
+    "has_lib_validator",
+    "has_lib_yup",
+    "has_lib_zod",
+    "orm_mongoose",
+    "orm_typeorm",
+    "orm_prisma",
+    "orm_sequelize"
+  ],
+  "hyperparameters": {
+    "hidden_dims": [
+      32,
+      16
+    ],
+    "learning_rate": 0.001,
+    "weight_decay": 0.01,
+    "batch_size": 8,
+    "epochs_trained": 60,
+    "best_val_acc": 0.75
+  },
+  "training_history": {
+    "final_train_loss": 0.4526613876223564,
+    "final_val_loss": 0.9712147116661072,
+    "final_train_acc": 0.8,
+    "final_val_acc": 0.75
+  }
+}
