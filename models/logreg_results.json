@@ -3,37 +3,37 @@
     "model_name": "Logistic Regression",
     "test_metrics": {
       "model_name": "LogReg_Test",
-      "accuracy": 0.4772727272727273,
-      "precision_macro": 0.46491228070175444,
-      "recall_macro": 0.6666666666666666,
-      "f1_macro": 0.5220125786163522,
-      "precision_weighted": 0.270933014354067,
-      "recall_weighted": 0.4772727272727273,
-      "f1_weighted": 0.3293310463121784,
-      "precision_openapi": 1.0,
+      "accuracy": 0.8714285714285714,
+      "precision_macro": 0.463768115942029,
+      "recall_macro": 0.6234096692111959,
+      "f1_macro": 0.49941927990708485,
+      "precision_weighted": 0.9504347826086956,
+      "recall_weighted": 0.8714285714285714,
+      "f1_weighted": 0.8999004479840718,
+      "precision_openapi": 0.4,
       "recall_openapi": 1.0,
-      "f1_openapi": 1.0,
+      "f1_openapi": 0.5714285714285715,
       "precision_typedef": 0.0,
       "recall_typedef": 0.0,
       "f1_typedef": 0.0,
-      "precision_validator": 0.39473684210526316,
-      "recall_validator": 1.0,
-      "f1_validator": 0.5660377358490566,
+      "precision_validator": 0.991304347826087,
+      "recall_validator": 0.8702290076335878,
+      "f1_validator": 0.926829268292683,
       "confusion_matrix": [
         [
-          6,
+          8,
           0,
           0
         ],
         [
           0,
           0,
-          23
+          1
         ],
         [
-          0,
-          0,
-          15
+          12,
+          5,
+          114
         ]
       ]
     },
@@ -57,63 +57,63 @@
       "f1_validator": 1.0,
       "confusion_matrix": [
         [
-          132,
+          138,
           0,
           0
         ],
         [
           0,
-          321,
+          151,
           0
         ],
         [
           0,
           0,
-          343
+          387
         ]
       ]
     },
     "cv_results": {
       "cv_scores": [
-        0.6621509147699177,
+        0.3337301587301587,
         1.0,
         1.0,
         1.0,
-        1.0
+        0.6543014068787265
       ],
-      "cv_mean": 0.9324301829539834,
-      "cv_std": 0.13513963409203295
+      "cv_mean": 0.7976063131217771,
+      "cv_std": 0.2678085122735894
     },
     "practical_metrics": {
-      "total_endpoints": 44,
-      "correct_predictions": 21,
-      "incorrect_predictions": 23,
-      "calls_without_model": 880,
-      "calls_with_model": 366,
-      "calls_saved": 514,
-      "percent_calls_saved": 58.409090909090914
+      "total_endpoints": 140,
+      "correct_predictions": 122,
+      "incorrect_predictions": 18,
+      "calls_without_model": 2800,
+      "calls_with_model": 392,
+      "calls_saved": 2408,
+      "percent_calls_saved": 86.0
     },
     "feature_importance": {
-      "has_openapi_spec": 1.4846076051917565,
-      "openapi_file_count": 0.9821077793075546,
-      "has_multiple_schema_types": 0.7773696507094,
-      "has_linting": 0.7311931340154608,
-      "has_lib_express-validator": 0.6103971666253672,
-      "has_validators": 0.6098748635027349,
-      "orm_prisma": 0.5584206806210168,
-      "validator_file_count": 0.5194351933162311,
-      "is_nestjs": 0.5014209785362844,
-      "has_lib_class-validator": 0.5014209785362844,
-      "has_type_defs": 0.49165929507312106,
-      "has_typescript": 0.49165929507312106,
-      "jsx_file_count": 0.47960795342335266,
-      "orm_mongoose": 0.456149086081369,
-      "orm_typeorm": 0.4178086740810425,
-      "has_lib_joi": 0.36796990852741457,
-      "typedef_file_count": 0.35248513271839044,
-      "is_express": 0.3349552454815024,
-      "has_lib_zod": 0.3309942492851083,
-      "has_orm": 0.33098868206710313
+      "has_openapi_spec": 1.3310173946765456,
+      "has_multiple_schema_types": 0.9395221961251644,
+      "has_validators": 0.8594498911499437,
+      "openapi_file_count": 0.8365913890953891,
+      "has_type_defs": 0.794177965393635,
+      "has_lib_zod": 0.6040243787279788,
+      "typedef_file_count": 0.5980267163010033,
+      "avg_lines_per_file": 0.5414285312867172,
+      "has_readme": 0.42016392219062143,
+      "dev_dependency_count": 0.40309392899198554,
+      "validator_file_count": 0.396860911841415,
+      "has_auth": 0.3965976629889179,
+      "has_typescript": 0.3891902557182764,
+      "orm_typeorm": 0.38573070596424536,
+      "has_validation": 0.3798469699073384,
+      "has_linting": 0.367040153298011,
+      "has_orm": 0.36516223908874973,
+      "is_nestjs": 0.33512095550647,
+      "has_lib_class-validator": 0.33512095550647,
+      "has_lib_joi": 0.31789006844269596
     },
     "hyperparameters": {
       "C": 1.0,

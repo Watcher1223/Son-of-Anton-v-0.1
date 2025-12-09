@@ -1,0 +1,376 @@
+================================================================================
+PRESENTATION OUTLINE: Predicting API Schema Extraction Strategies
+================================================================================
+
+================================================================================
+SLIDE 1: Title
+================================================================================
+Title: Predicting API Schema Extraction Strategies Using Endpoint Metadata
+Authors: Alspencer Omondi & Ethan Sandoval
+Course: [Your Course]
+Date: [Date]
+
+================================================================================
+SLIDE 2: Problem Statement
+================================================================================
+Title: The Problem
+
+- API testing tools need to extract schemas to understand endpoints
+- But developers use DIFFERENT schema approaches:
+  • OpenAPI/Swagger specifications
+  • Runtime validators (Joi, Zod, class-validator)
+  • TypeScript interfaces/DTOs
+
+- Current tools try each method sequentially
+  → 15-30 GitHub API calls per endpoint
+  → Rate limiting issues
+  → Slow extraction
+
+Question: Can we PREDICT the right method before trying?
+
+================================================================================
+SLIDE 3: Our Approach
+================================================================================
+Title: Our Solution
+
+Two-level prediction approach:
+
+1. ENDPOINT-LEVEL MODEL
+   - Uses detailed code features (110 features)
+   - Requires cloning the repository
+   - Most accurate
+
+2. REPOSITORY-LEVEL MODEL  
+   - Uses only GitHub API features (42 features)
+   - NO cloning required (3-5 API calls)
+   - Lightweight screening
+
+================================================================================
+SLIDE 4: Dataset Overview
+================================================================================
+Title: Dataset
+
+- 912 labeled endpoints from 38 Node.js repositories
+- Frameworks: Express, NestJS, Fastify
+
+Class Distribution:
+┌─────────────┬───────┬────────┐
+│ Class       │ Count │ %      │
+├─────────────┼───────┼────────┤
+│ Validator   │ 615   │ 67%    │
+│ TypeDef     │ 151   │ 17%    │
+│ OpenAPI     │ 146   │ 16%    │
+└─────────────┴───────┴────────┘
+
+Note: Imbalanced - reflects real-world validator prevalence
+
+================================================================================
+SLIDE 5: Feature Categories
+================================================================================
+Title: Features Extracted
+
+ENDPOINT-LEVEL (68 features):
+- HTTP method, path depth, parameters
+- Middleware, authentication indicators
+- Decorator usage (@Body, @ApiOperation)
+- Validator imports (Joi, Zod patterns)
+
+REPOSITORY-LEVEL (32 features):
+- Framework type (Express/NestJS/Fastify)
+- Dependencies, TypeScript ratio
+- ORM presence, testing/linting config
+
+EXTRACTION-SOURCE (10 features):
+- OpenAPI file count
+- Validator folder presence
+- DTO folder presence
+
+================================================================================
+SLIDE 6: Model 1 - Logistic Regression (Background)
+================================================================================
+Title: Logistic Regression
+
+WHAT IS IT?
+- Linear classifier that predicts probability of each class
+- Uses sigmoid function: P(y=1|x) = 1 / (1 + e^(-wx))
+- For multi-class: uses softmax (one-vs-rest)
+
+WHY USE IT?
+✓ Simple, fast, interpretable
+✓ Feature coefficients show importance
+✓ Good baseline to compare against
+✓ Works well when classes are linearly separable
+
+OUR CONFIGURATION:
+- L2 regularization (prevents overfitting)
+- Balanced class weights (handles imbalance)
+- Solver: L-BFGS
+
+================================================================================
+SLIDE 7: Model 1 - Logistic Regression (How It Works)
+================================================================================
+Title: Logistic Regression - How It Works
+
+[Diagram idea: Input features → Weighted sum → Sigmoid → Probabilities]
+
+1. Each feature gets a weight (learned during training)
+2. Compute weighted sum: z = w₁x₁ + w₂x₂ + ... + wₙxₙ + b
+3. Apply sigmoid: σ(z) = 1/(1+e^(-z))
+4. Output: probability for each class
+5. Predict: class with highest probability
+
+INTERPRETABILITY:
+- Large positive weight → feature increases class probability
+- Large negative weight → feature decreases class probability
+- Example: has_openapi_spec has high weight for OpenAPI class
+
+================================================================================
+SLIDE 8: Model 2 - XGBoost (Background)
+================================================================================
+Title: XGBoost (Extreme Gradient Boosting)
+
+WHAT IS IT?
+- Ensemble of decision trees
+- Trees built sequentially, each correcting previous errors
+- "Gradient boosting" = uses gradients to minimize loss
+
+WHY USE IT?
+✓ Captures non-linear relationships
+✓ Handles feature interactions automatically
+✓ Often wins ML competitions
+✓ Built-in feature importance
+✓ Robust to outliers
+
+OUR CONFIGURATION:
+- 100 trees, max depth 6
+- Learning rate: 0.1
+- Subsample: 80% (prevents overfitting)
+
+================================================================================
+SLIDE 9: Model 2 - XGBoost (How It Works)
+================================================================================
+Title: XGBoost - How It Works
+
+[Diagram idea: Tree 1 → Residuals → Tree 2 → Residuals → Tree 3 → Sum]
+
+BOOSTING PROCESS:
+1. Train Tree 1 on data
+2. Calculate errors (residuals)
+3. Train Tree 2 to predict the errors
+4. Calculate new errors
+5. Train Tree 3 to predict remaining errors
+6. ... repeat for N trees
+7. Final prediction = sum of all tree predictions
+
+KEY INSIGHT:
+- Each tree focuses on what previous trees got WRONG
+- Ensemble is stronger than any individual tree
+
+================================================================================
+SLIDE 10: Model 3 - Neural Network (Background)
+================================================================================
+Title: Neural Network
+
+WHAT IS IT?
+- Layers of interconnected "neurons"
+- Each neuron: weighted sum → activation function
+- Learns complex patterns through backpropagation
+
+WHY USE IT?
+✓ Can learn highly non-linear patterns
+✓ Automatic feature learning
+✓ Flexible architecture
+✗ Needs more data than traditional ML
+✗ Less interpretable ("black box")
+
+OUR ARCHITECTURE:
+Input (110) → Dense (128) → ReLU → Dropout → Dense (64) → ReLU → Dropout → Output (3)
+
+================================================================================
+SLIDE 11: Model 3 - Neural Network (How It Works)
+================================================================================
+Title: Neural Network - How It Works
+
+[Diagram idea: Input layer → Hidden layer 1 → Hidden layer 2 → Output]
+
+FORWARD PASS:
+1. Input features enter first layer
+2. Each neuron computes: z = Σ(wᵢxᵢ) + b
+3. Apply ReLU activation: max(0, z)
+4. Dropout randomly zeros neurons (prevents overfitting)
+5. Repeat for next layer
+6. Output layer uses softmax for class probabilities
+
+TRAINING (Backpropagation):
+1. Compute loss (cross-entropy)
+2. Calculate gradients (how to adjust weights)
+3. Update weights using Adam optimizer
+4. Repeat for many epochs
+
+================================================================================
+SLIDE 12: Evaluation Strategy
+================================================================================
+Title: How We Evaluated
+
+5-FOLD CROSS-VALIDATION:
+- Split data into 5 parts
+- Train on 4 parts, test on 1
+- Rotate 5 times
+- Average results → more reliable estimate
+
+[Diagram: Show 5 folds with rotating test set]
+
+REPOSITORY-LEVEL SPLIT:
+- All endpoints from same repo stay together
+- Prevents data leakage
+- More realistic evaluation
+
+METRICS:
+- Accuracy: % correct predictions
+- F1-Score: Balance of precision & recall
+- Practical: API calls saved
+
+================================================================================
+SLIDE 13: Results - Endpoint-Level
+================================================================================
+Title: Results: Endpoint-Level Models
+
+┌─────────────────────┬──────────┬───────┬────────┬─────┐
+│ Model               │ Accuracy │ Prec  │ Recall │ F1  │
+├─────────────────────┼──────────┼───────┼────────┼─────┤
+│ Logistic Regression │ 79.8%    │ 0.46  │ 0.62   │0.50 │
+│ XGBoost             │ 87.4%    │ 0.67  │ 0.67   │0.67 │
+│ Neural Network      │ 74.3%    │ 0.39  │ 0.58   │0.39 │
+└─────────────────────┴──────────┴───────┴────────┴─────┘
+
+WINNER: XGBoost (87.4% accuracy)
+- 54% better than random baseline (33%)
+- Best F1 score across all classes
+
+================================================================================
+SLIDE 14: Results - Repository-Level
+================================================================================
+Title: Results: Repository-Level Models (No Cloning)
+
+┌─────────────────────┬─────────────────┬─────────────────┐
+│ Model               │ CV Accuracy     │ CV F1 (macro)   │
+├─────────────────────┼─────────────────┼─────────────────┤
+│ Logistic Regression │ 82.1% ± 9.8%    │ 62.8% ± 24.0%   │
+│ XGBoost             │ 78.9% ± 11.2%   │ 58.4% ± 21.3%   │
+│ Neural Network      │ 76.3% ± 15.1%   │ 54.2% ± 28.7%   │
+└─────────────────────┴─────────────────┴─────────────────┘
+
+KEY INSIGHT:
+- 82% accuracy using ONLY GitHub API features
+- Can screen repos without cloning
+- High variance due to small dataset (38 repos)
+
+================================================================================
+SLIDE 15: Practical Impact
+================================================================================
+Title: Practical Impact
+
+API CALLS SAVED:
+- Without model: 20 calls/endpoint (try everything)
+- With XGBoost: 1.1 calls/endpoint
+- REDUCTION: 94.5%
+
+AT SCALE (1,000 endpoints):
+- Without model: 20,000 API calls
+- With model: 1,100 API calls
+- SAVED: ~19,000 calls
+
+BENEFIT:
+→ Avoid GitHub rate limits
+→ Faster extraction
+→ Lower computational cost
+
+================================================================================
+SLIDE 16: Feature Importance
+================================================================================
+Title: What Features Matter Most?
+
+TOP 5 FEATURES (XGBoost):
+1. has_openapi_spec (17.4%)     ← Does repo have OpenAPI files?
+2. openapi_file_count (14.7%)   ← How many spec files?
+3. has_validators (14.6%)       ← Are there validator folders?
+4. validator_file_count (12.1%) ← How many validator files?
+5. has_multiple_schema_types    ← Mixed approaches?
+
+KEY INSIGHT:
+- Repository-level features > Endpoint-level features
+- Schema choice is a PROJECT decision, not per-endpoint
+- Simple file presence is highly predictive
+
+================================================================================
+SLIDE 17: Limitations
+================================================================================
+Title: Limitations
+
+1. SMALL DATASET
+   - Only 38 repositories
+   - High variance in results
+   - Need more data for reliability
+
+2. CLASS IMBALANCE
+   - 67% validator class
+   - Models biased toward majority
+   - Lower recall for OpenAPI/TypeDef
+
+3. NODE.JS ONLY
+   - Haven't tested Python, Go, etc.
+   - May not generalize
+
+================================================================================
+SLIDE 18: Future Work
+================================================================================
+Title: Future Work
+
+EXPAND DATASET:
+- More repositories (especially OpenAPI/TypeDef)
+- Balance classes better
+
+NEW FRAMEWORKS:
+- Python: Django, FastAPI, Flask
+- Go: Gin, Echo
+- Java: Spring Boot
+
+PRODUCTION INTEGRATION:
+- Build into actual extraction tools
+- Real-time prediction API
+
+================================================================================
+SLIDE 19: Conclusions
+================================================================================
+Title: Conclusions
+
+✓ ML can predict schema extraction strategy
+  - 87% accuracy (endpoint-level)
+  - 82% accuracy (repo-level, no cloning)
+
+✓ Reduces API calls by 95%
+  - Major practical benefit
+
+✓ Repository features most important
+  - Schema choice follows project conventions
+
+✓ Simple models work well
+  - XGBoost best, but LogReg competitive
+
+================================================================================
+SLIDE 20: Questions?
+================================================================================
+Title: Questions?
+
+Thank you!
+
+Contact:
+- aomondi@hmc.edu
+- etsandoval@hmc.edu
+
+Code: [GitHub repo link if applicable]
+
+================================================================================
+END OF OUTLINE
+================================================================================
+

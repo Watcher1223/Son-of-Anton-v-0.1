@@ -1,0 +1,5 @@
+repo_url,repo_name,owner,full_name,stars,size_kb,language,frameworks,has_openapi,has_validators,has_typescript
+https://github.com/shapeshift/unchained,unchained,shapeshift,shapeshift/unchained,0,0,TypeScript,Express,True,False,True
+https://github.com/neo4j-examples/neo4j-movies-template,neo4j-movies-template,neo4j-examples,neo4j-examples/neo4j-movies-template,312,0,JavaScript,Express,True,False,False
+https://github.com/hagopj13/node-express-boilerplate,node-express-boilerplate,hagopj13,hagopj13/node-express-boilerplate,6500,3000,JavaScript,Express,False,True,False
+https://github.com/brocoders/nestjs-boilerplate,nestjs-boilerplate,brocoders,brocoders/nestjs-boilerplate,2200,5000,TypeScript,NestJS,True,True,True

@@ -3,37 +3,37 @@
     "model_name": "XGBoost",
     "test_metrics": {
       "model_name": "XGBoost_Test",
-      "accuracy": 0.36363636363636365,
-      "precision_macro": 0.4343434343434343,
-      "recall_macro": 0.5555555555555555,
-      "f1_macro": 0.47222222222222215,
-      "precision_weighted": 0.23966942148760334,
-      "recall_weighted": 0.36363636363636365,
-      "f1_weighted": 0.2784090909090909,
+      "accuracy": 0.9928571428571429,
+      "precision_macro": 0.6641414141414141,
+      "recall_macro": 0.6666666666666666,
+      "f1_macro": 0.6653992395437262,
+      "precision_weighted": 0.9857683982683982,
+      "recall_weighted": 0.9928571428571429,
+      "f1_weighted": 0.9892992938620314,
       "precision_openapi": 1.0,
       "recall_openapi": 1.0,
       "f1_openapi": 1.0,
       "precision_typedef": 0.0,
       "recall_typedef": 0.0,
       "f1_typedef": 0.0,
-      "precision_validator": 0.30303030303030304,
-      "recall_validator": 0.6666666666666666,
-      "f1_validator": 0.41666666666666663,
+      "precision_validator": 0.9924242424242424,
+      "recall_validator": 1.0,
+      "f1_validator": 0.9961977186311787,
       "confusion_matrix": [
         [
-          6,
+          8,
           0,
           0
         ],
         [
           0,
           0,
-          23
+          1
         ],
         [
           0,
-          5,
-          10
+          0,
+          131
         ]
       ]
     },
@@ -57,63 +57,63 @@
       "f1_validator": 1.0,
       "confusion_matrix": [
         [
-          132,
+          138,
           0,
           0
         ],
         [
           0,
-          321,
+          151,
           0
         ],
         [
           0,
           0,
-          343
+          387
         ]
       ]
     },
     "cv_results": {
       "cv_scores": [
-        0.890554282019632,
+        0.6576086956521738,
         1.0,
         1.0,
         1.0,
-        0.8921505690107967
+        0.7133706033077102
       ],
-      "cv_mean": 0.9565409702060859,
-      "cv_std": 0.053228617483063616
+      "cv_mean": 0.8741958597919768,
+      "cv_std": 0.15508372440317003
     },
     "practical_metrics": {
-      "total_endpoints": 44,
-      "correct_predictions": 16,
-      "incorrect_predictions": 28,
-      "calls_without_model": 880,
-      "calls_with_model": 436,
-      "calls_saved": 444,
-      "percent_calls_saved": 50.45454545454545
+      "total_endpoints": 140,
+      "correct_predictions": 139,
+      "incorrect_predictions": 1,
+      "calls_without_model": 2800,
+      "calls_with_model": 154,
+      "calls_saved": 2646,
+      "percent_calls_saved": 94.5
     },
     "feature_importance": {
-      "typedef_file_count": 0.20764803298015466,
-      "has_lib_express-validator": 0.11443730947113082,
-      "openapi_file_count": 0.10054372992638974,
-      "jsx_file_count": 0.09847838552894728,
-      "endpoints_per_1000_lines": 0.08502494707325707,
-      "js_file_count": 0.07721652717553035,
-      "has_openapi_spec": 0.0755867716052893,
-      "has_linting": 0.03993410603240465,
-      "orm_prisma": 0.03134069784399087,
-      "readme_length": 0.029375048744853607,
-      "dev_dependency_count": 0.026075103818858945,
-      "dependency_count": 0.022779438095382996,
-      "total_files": 0.02026260441586482,
-      "total_lines_of_code": 0.011856787987665554,
-      "has_validators": 0.011809900072517424,
-      "total_dependency_count": 0.011028968526922294,
-      "total_source_files": 0.009575279894583557,
-      "validator_file_count": 0.008531748336324663,
-      "has_testing": 0.0044972050684453915,
-      "avg_lines_per_file": 0.0036055823353420393
+      "openapi_file_count": 0.13928253266644544,
+      "jsx_file_count": 0.11799259242281497,
+      "typedef_file_count": 0.10512176773830165,
+      "total_lines_of_code": 0.09625539518880148,
+      "has_openapi_spec": 0.08675290670174564,
+      "has_lib_express-validator": 0.049764389602620175,
+      "orm_prisma": 0.04037997122074746,
+      "has_try_catch": 0.03805133099337501,
+      "has_multiple_schema_types": 0.03398241002441732,
+      "has_testing": 0.030079139792638543,
+      "total_files": 0.0297486841539439,
+      "endpoints_per_1000_lines": 0.027206841068711265,
+      "typescript_ratio": 0.026110466981365734,
+      "total_source_files": 0.023544253850073946,
+      "has_db_models": 0.01866085253606263,
+      "js_file_count": 0.01782305468764305,
+      "avg_lines_per_file": 0.012455987434646727,
+      "query_param_count": 0.01173674913564234,
+      "readme_length": 0.009531916915493856,
+      "dev_dependency_count": 0.008955199549789475
     },
     "hyperparameters": {
       "n_estimators": 100,

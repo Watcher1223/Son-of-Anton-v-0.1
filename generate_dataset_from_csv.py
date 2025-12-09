@@ -24,8 +24,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def clone_and_process_repos(csv_file: str, target_count: int = 12, output_dir: Path = Path("data/raw")):
-    """Clone repositories from CSV and process them"""
+def clone_and_process_repos(csv_file: str, target_count: int | None = 12, output_dir: Path = Path("data/raw")):
+    """
+    Clone repositories from CSV and process them.
+
+    If target_count is None, process all valid repositories in the CSV without
+    applying the star-based cap. This is useful for curated CSVs where we want
+    to ensure specific repos (e.g., OpenAPI-heavy backends) are always included.
+    """
     
     # Read CSV
     df = pd.read_csv(csv_file)
@@ -34,9 +40,11 @@ def clone_and_process_repos(csv_file: str, target_count: int = 12, output_dir: P
     # Filter for repos with Express/NestJS/Fastify
     df = df[df['frameworks'].notna()]
     
-    # Take top repositories by stars
-    df = df.sort_values('stars', ascending=False).head(target_count * 3)
-    
+    # For non-curated runs, keep only top repositories by stars so we don't
+    # waste time cloning hundreds of low-signal student/homework repos.
+    if target_count is not None:
+        df = df.sort_values('stars', ascending=False).head(target_count * 3)
+
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Initialize components
@@ -51,7 +59,8 @@ def clone_and_process_repos(csv_file: str, target_count: int = 12, output_dir: P
     successful_repos = 0
     
     for idx, row in df.iterrows():
-        if successful_repos >= target_count:
+        # When target_count is None we process all candidates in the CSV.
+        if target_count is not None and successful_repos >= target_count:
             break
         
         repo_url = row['repo_url']
@@ -162,10 +171,16 @@ def main():
         logger.error("Usage: python generate_dataset_from_csv.py [csv_file]")
         sys.exit(1)
     
-    # Clone and extract features - increased target count for better dataset
+    # Clone and extract features - increased target count for better dataset.
+    # For curated_repos.csv we want to process ALL curated repositories and
+    # avoid dropping important ones (e.g., OpenAPI-heavy backends) due to the
+    # star-based cap, so we pass target_count=None in that case.
     logger.info("Phase 1: Cloning repositories and extracting features...")
     logger.info(f"Using CSV: {csv_file}")
-    records = clone_and_process_repos(csv_file, target_count=40)
+    if Path(csv_file).name == "curated_repos.csv":
+        records = clone_and_process_repos(csv_file, target_count=None)
+    else:
+        records = clone_and_process_repos(csv_file, target_count=40)
     
     if len(records) == 0:
         logger.error("No records extracted!")
